@@ -27,7 +27,8 @@ button{font-family:var(--pf)}
 #btns{position:absolute;left:0;right:0;display:flex;justify-content:center;gap:16px;z-index:900;transform:translateY(-50%)}
 .btn{font:400 max(16px,calc(var(--cw)*.26))/1 var(--pf);font:400 round(max(16px,calc(var(--cw)*.26)),16px)/1 var(--pf);padding:.55em 1.1em;color:#fff;border:0;border-radius:0;cursor:pointer;text-transform:uppercase;letter-spacing:0;text-shadow:none;margin:var(--p);
 box-shadow:0 calc(var(--p)*-1) 0 0 #111,calc(var(--p)*-1) 0 0 0 #111,var(--p) 0 0 0 #111,0 var(--p) 0 0 #111;image-rendering:pixelated;transition:none}
-.bito{background:#e0452f}.take{background:#2f7be0}
+.bito{background:#e0452f}.take{background:#2f7be0}.throw{background:#2fa84f}
+.card.tgt .f{outline:calc(var(--p)*1.5) solid #ffd23f;outline-offset:calc(var(--p)*-1.5)}
 .btn:hover:not(:disabled){animation:vib .24s steps(1) infinite}
 .btn:active:not(:disabled){animation:none;transform:translateY(var(--p));box-shadow:0 calc(var(--p)*-1) 0 0 #111,calc(var(--p)*-1) 0 0 0 #111,var(--p) 0 0 0 #111,0 var(--p) 0 0 #111}
 .btn:disabled{filter:grayscale(1) brightness(.55);cursor:default}
@@ -45,10 +46,65 @@ box-shadow:0 calc(var(--p)*-1) 0 0 #111,calc(var(--p)*-1) 0 0 0 #111,var(--p) 0 
 #code{font:400 24px/1 var(--pf);text-transform:uppercase;text-align:center;width:5.6ch;padding:.5em .3em;border:0;border-radius:0;background:#fff;color:#111;outline:0;box-shadow:0 calc(var(--p)*-1) 0 0 #111,calc(var(--p)*-1) 0 0 0 #111,var(--p) 0 0 0 #111,0 var(--p) 0 0 #111;user-select:text;-webkit-user-select:text}
 #mpmsg{font-size:16px;min-height:1.2em;max-width:340px;margin:12px auto 0;display:block!important;word-break:break-word}
 #end h2,#start h2{margin:0 0 22px;font-size:32px;line-height:1.2;font-weight:400}
+
+/* ================= АДАПТИВНІСТЬ (mobile-first) =================
+   база: смартфони 320–767 | ≥768: малі ПК-монітори | ≥1280: ноутбуки | ≥1440: великі монітори */
+:root{--maxw:1440px;--gut:0px}
+html{font-size:16px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{width:100%;max-width:100%;height:100%;height:100dvh;overflow:hidden;overflow-x:hidden;overscroll-behavior:none}
+body{background:radial-gradient(ellipse 70% 60% at 50% 40%,#14503a,#0b3a20 80%) #0b3a20}
+img,canvas,svg,video{max-width:100%;height:auto}
+/* ігрове поле — центрований контейнер; фон сторінки тягнеться на всю ширину */
+#world{left:0;right:0;margin-inline:auto;width:min(calc(100% - var(--gut)*2),var(--maxw));top:0;bottom:0;height:auto;overflow:hidden}
+/* зручні для пальця кнопки (≥44px) */
+.btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;max-width:100%}
+#code{min-height:44px}
+#mute{width:44px;height:44px;font-size:20px;right:calc(6px + var(--p) + env(safe-area-inset-right,0px));top:calc(6px + var(--p) + env(safe-area-inset-top,0px))}
+#btns{gap:clamp(8px,2.5vw,16px);padding:0 8px;flex-wrap:nowrap}
+#btns .btn{padding:.5em clamp(.6em,2.4vw,1.1em);white-space:nowrap}
+/* стартове меню / екран кінця: один вертикальний стовпчик, не вилазить за екран */
+#start div,#end div{width:min(calc(100% - 24px),26rem);max-width:none;padding:clamp(16px,5vw,28px) clamp(14px,5vw,34px);max-height:calc(100% - 24px);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:stretch;gap:12px}
+#start h2,#end h2{font-size:clamp(22px,6.5vw,32px);margin:0 0 4px}
+#start p{margin:0;width:100%;flex-wrap:nowrap}
+#start #mp2 .btn{flex:1 1 auto;min-width:0}
+#start .btn,#end .btn{font-size:max(16px,1rem)}
+#code{flex:0 0 auto}
+#mpmsg{max-width:100%;margin:0 auto;font-size:clamp(13px,3.6vw,16px);overflow-wrap:anywhere}
+#status{padding:0 12px}
+/* ---- малі ПК-монітори (768–1279, у т.ч. 1024×768, 1280×1024): компактніше, бічні відступи 20px ---- */
+@media (min-width:768px){
+  :root{--gut:20px}
+  #start div,#end div{display:block;width:auto;max-width:min(90%,30rem);padding:clamp(18px,3vh,28px) 30px}
+  #start p{margin:14px 0 0;flex-wrap:wrap}
+  #start #mp2 .btn{flex:0 0 auto}
+  #start .btn{width:auto}
+  #start h2,#end h2{font-size:clamp(26px,3.4vw,32px);margin:0 0 18px}
+  #btns{gap:14px}
+}
+/* ---- ноутбуки (1280–1439): повна десктопна версія, без бічних відступів ---- */
+@media (min-width:1280px){
+  :root{--gut:0px}
+}
+/* ---- великі монітори (≥1440): контейнер не ширший за 1440px, по центру ---- */
+@media (min-width:1440px){
+  :root{--maxw:1440px}
+}
+/* ---- невисокі екрани (ноутбуки 720–800px заввишки, горизонтальні телефони): меню завжди вміщається ---- */
+@media (max-height:800px){
+  #start div,#end div{padding-block:14px;gap:8px}
+  #start h2,#end h2{margin-bottom:10px;font-size:clamp(20px,4.2vh,30px)}
+  #start p{margin-top:10px}
+  #mpmsg{font-size:clamp(12px,2.2vh,16px)}
+}
+@media (max-height:520px){
+  #start div,#end div{padding-block:8px}
+  #start h2,#end h2{margin-bottom:6px}
+}
+@media (prefers-reduced-motion:reduce){#world{animation:none}}
 </style></head><body>
 <div id="world"><div class="slot" id="slT"></div><div class="slot" id="slB"></div><div id="stage"></div>
 <div id="status"></div><div id="deckinfo"></div><div class="lbl" id="cB"></div><div class="lbl" id="cP"></div>
-<div id="btns"><button class="btn bito" id="bBito">Бито</button><button class="btn take" id="bTake">Взяти</button></div>
+<div id="btns"><button class="btn throw" id="bThrow" style="display:none">Кинути</button><button class="btn bito" id="bBito">Бито</button><button class="btn take" id="bTake">Взяти</button></div>
 <div id="end"><div><h2 id="endT"></h2><button class="btn bito" id="bAgain">Ще раз</button></div></div>
 <div id="start"><div><h2>Підкидний Дурень</h2><button class="btn bito" id="bStart">Грати з ботом</button><p id="mp"><button class="btn take sm" id="bHost">Створити кімнату</button></p><p id="mp2"><input id="code" maxlength="6" placeholder="КОД" autocomplete="off" spellcheck="false"><button class="btn take sm" id="bJoin">Приєднатись</button></p><p id="mpmsg"></p></div></div>
 <button id="mute" title="Звук">🔊</button></div>
@@ -150,7 +206,8 @@ const undef=()=>table.filter(t=>!t.d);
 function canAtk(c,who){const def=who==='p'?B:P;return table.length<6&&(!table.length||table.some(t=>t.a.r===c.r||(t.d&&t.d.r===c.r)))&&undef().length<def.length}
 const rm=(a,c)=>a.splice(a.indexOf(c),1);
 
-function resize(){W=innerWidth;H=innerHeight;cw=Math.min(92,W/8.6,H/(7.6*1.4));const d=devicePixelRatio||1;cw=Math.round(cw*d)/d;ch=Math.round(cw*d*95/71)/d;const r=document.documentElement.style;r.setProperty('--cw',cw+'px');r.setProperty('--ch',ch+'px');r.setProperty('--px',1/d+'px');r.setProperty('--sh',Math.max(2,Math.round(3*cw*d/71))/d+'px');if(all)layout();if(assets){clearTimeout(rt);rt=setTimeout(()=>{assets=buildArt()},150)}}
+let ox=0;
+function resize(){W=W0.clientWidth||innerWidth;H=W0.clientHeight||innerHeight;ox=W0.getBoundingClientRect().left;const vw=innerWidth,cap=vw>=1920?132:vw>=1440?112:vw>=1280?100:92;cw=Math.min(cap,W/(vw<768?7.4:8.6),H/(7.6*1.4));const d=devicePixelRatio||1;cw=Math.round(cw*d)/d;ch=Math.round(cw*d*95/71)/d;const r=document.documentElement.style;r.setProperty('--cw',cw+'px');r.setProperty('--ch',ch+'px');r.setProperty('--px',1/d+'px');r.setProperty('--sh',Math.max(2,Math.round(3*cw*d/71))/d+'px');if(all)layout();if(assets){clearTimeout(rt);rt=setTimeout(()=>{assets=buildArt()},150)}}
 function fan(arr,y,sg,z0,fd){const n=arr.length,mid=(n-1)/2,step=n>1?Math.min(cw*.68,(W-cw*5)/(n-1)):0,a=Math.min(4.5,34/Math.max(n,1));
   arr.forEach((c,i)=>{const d=i-mid;setb(c,{x:HX+d*step,y:y+sg*d*d*ch*.014,r:sg*d*a,s:1,z:z0+i,fd,fl:true})})}
 function layout(){
@@ -165,7 +222,8 @@ function layout(){
   disc.forEach((c,i)=>{c.loc='disc';setb(c,{x:rx+c.jx,y:ry+c.jy,r:c.rr+720,s:1,z:100+i,fd:true,fl:false})});
   deck.forEach((c,i)=>c.el.classList.toggle('stk',i>1));disc.forEach((c,i)=>c.el.classList.toggle('stk',i>0));B.concat(P).forEach(c=>c.el.classList.remove('stk'));table.forEach(t=>{t.a.el.classList.remove('stk');if(t.d)t.d.el.classList.remove('stk')});
   const u=undef()[0];
-  P.forEach(c=>{c.dim=mode==='atk'?!canAtk(c,'p'):mode==='def'&&u?!beats(c,u.a):false;c.el.classList.toggle('dim',c.dim)});
+  P.forEach(c=>{c.dim=mode==='atk'?!canSel(c):mode==='def'?!undef().some(t=>beats(c,t.a)):false;c.el.classList.toggle('dim',c.dim)});
+  table.forEach(t=>t.a.el.classList.toggle('tgt',mode==='def'&&!!dsel&&!t.d&&beats(dsel,t.a)));
   const ds=$('#deckinfo').style;ds.left=dx+'px';ds.top=dy+ch*.62+'px';$('#deckinfo').textContent=SN[T]+' '+deck.length+'/36';
   $('#status').style.top=ch*1.55+'px';$('#btns').style.top=H-ch*2.05+'px';
   const sT=$('#slT').style,sB=$('#slB').style;sT.left=sB.left=cw*1.9+'px';sT.width=sB.width=W-cw*3.8+'px';sT.top='8px';sT.height=ch*1.1+'px';sB.top=H-ch*1.52+'px';sB.height=ch*1.42+'px';
@@ -173,7 +231,7 @@ function layout(){
 }
 function hit(){
   if(!P)return null;
-  for(let i=P.length-1;i>=0;i--){const c=P[i],b=c.b,l=c===hov?ch*.3:0;
+  for(let i=P.length-1;i>=0;i--){const c=P[i],b=c.b,l=(c===hov||c.sel)?ch*.3:0;
     if(Math.abs(mx-b.x)<cw/2&&my>b.y-ch/2-l&&my<b.y+ch/2)return c}
   return null;
 }
@@ -186,6 +244,7 @@ function frame(now){
     const b=c.b,p=c.p;let tx=b.x,ty=b.y,tr=b.r,ts=b.s,tix=0,tiy=0,z=b.z;
     if(c===hov&&c.loc==='p'){ty-=ch*.3;tr=0;ts=1.18;z=800;
       tiy=Math.max(-.6,Math.min(.6,(mx-b.x)/cw))*45;tix=-Math.max(-.6,Math.min(.6,(my-ty)/ch))*45}
+    else if(c.sel&&c.loc==='p'){ty-=ch*.3;tr=0;ts=1.1;z=700}
     p.x.t=tx;p.y.t=ty;p.r.t=tr;p.sc.t=ts;p.tx.t=tix;p.ty.t=tiy;p.fl.t=b.fd?180:0;
     const k=(c.loc==='disc'||c.fast)?320:(c===hov?240:170),d=2*Math.sqrt(k)*.5;
     for(let s=0;s<2;s++)for(const n in p){const o=p[n];o.v+=(k*(o.t-o.x)-d*o.v)*dt/2;o.x+=o.v*dt/2}
@@ -204,13 +263,48 @@ const waitAct=()=>new Promise(r=>resolver=r);
 function act(v){if(resolver){const r=resolver;resolver=null;r(v)}}
 function pop(t,x,y,cl){const d=document.createElement('div');d.className='pop '+cl;d.textContent=t;d.style.left=x+'px';d.style.top=y+'px';W0.appendChild(d);setTimeout(()=>d.remove(),1050)}
 function nope(c){c.p.r.v+=500;c.p.x.v+=(Math.random()<.5?-1:1)*700;sfx('nope',{v:.7})}
-addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY});
-addEventListener('pointerdown',e=>{mx=e.clientX;my=e.clientY;if(e.target.closest('.btn'))return;const c=hit();if(c&&mode)act({card:c})});
+addEventListener('pointermove',e=>{mx=e.clientX-ox;my=e.clientY-W0.getBoundingClientRect().top});
+addEventListener('pointerdown',e=>{mx=e.clientX-ox;my=e.clientY-W0.getBoundingClientRect().top;if(e.target.closest('.btn'))return;const c=hit();if(c&&mode){act({card:c});return}if(mode==='def'){const t=hitT();if(t)act({tgt:t})}});
 addEventListener('pointerup',e=>{if(e.pointerType==='touch'){mx=my=-999}});
-$('#bBito').onclick=()=>act({btn:'bito'});$('#bTake').onclick=()=>act({btn:'take'});
+$('#bBito').onclick=()=>act({btn:'bito'});$('#bThrow').onclick=()=>act({btn:'throw'});$('#bTake').onclick=()=>act({btn:'take'});
 $('#bAgain').onclick=()=>{if(MP&&MP.dead)return location.reload();$('#end').style.display='none';game()};
 addEventListener('resize',resize);
 
+
+/* ---- кидок кількох карт одного рангу ---- */
+let sel=[],dsel=null;
+const hitT=()=>table.find(t=>!t.d&&Math.abs(mx-t.a.b.x)<cw/2&&Math.abs(my-t.a.b.y)<ch/2);
+const capA=()=>Math.min(6-table.length,B.length-undef().length);
+function canSel(c){if(!canAtk(c,'p'))return false;if(!sel.length||sel.includes(c))return true;return c.r===sel[0].r&&sel.length<capA()}
+function updThrow(){const b=$('#bThrow');b.style.display=sel.length?'':'none';b.textContent=sel.length>1?'Кинути ×'+sel.length:'Кинути'}
+function clearSel(){sel.forEach(c=>c.sel=false);sel=[];updThrow()}
+function botBatch(c){const cap=Math.min(6-table.length,P.length-undef().length),same=B.filter(x=>x!==c&&x.r===c.r&&x.s!==T).slice(0,Math.max(0,cap-1));return same.length&&Math.random()<.5?[c,...same]:[c]}
+async function pDef(){
+  mode='def';dsel=null;layout();setBtns(0,1);
+  for(;;){
+    const u=undef();if(!u.length)return false;
+    say(dsel?'Клікни на карту на столі, яку б’єш':u.length>1?'Відбий карти (лишилось '+u.length+') або «Взяти»':'Відбий карту або тисни «Взяти»');
+    const a=await waitAct();
+    if(a.btn==='take'){if(dsel){dsel.sel=false;dsel=null}if(MP)MP.send({k:'take'});layout();return true}
+    let t=null,c=null;
+    if(a.card){
+      c=a.card;
+      if(dsel===c){c.sel=false;dsel=null;layout();continue}
+      const ts=u.filter(x=>beats(c,x.a));
+      if(!ts.length){nope(c);continue}
+      if(ts.length===1)t=ts[0];
+      else{if(dsel)dsel.sel=false;dsel=c;c.sel=true;layout();sfx('hover',{v:.4});continue}
+    }else if(a.tgt){
+      if(!dsel)continue;
+      if(!beats(dsel,a.tgt.a)){nope(dsel);continue}
+      t=a.tgt;c=dsel;
+    }else continue;
+    if(dsel){dsel.sel=false;dsel=null}
+    const ti=table.indexOf(t);
+    defend(t,c,'p');if(MP)MP.send({k:'def',s:c.s,r:c.r,t:ti});
+    await sleep(500);
+  }
+}
 function playAtk(who,c){rm(who==='p'?P:B,c);c.rr=rnd(-5,5);table.push({a:c,d:null});layout();sfx('slide',{v:.8,p:who==='p'?1:.95});setTimeout(()=>{shk=Math.max(shk,10);sfx('deal2',{v:.9});sfx('thud',{v:.3,p:1.1})},230)}
 function defend(t,c,who){rm(who==='p'?P:B,c);c.rr=rnd(8,16);t.d=c;layout();sfx('slide2',{v:.7});
   setTimeout(()=>{shk=Math.max(shk,9);sfx('deal2',{v:.9,p:1.05});sfx('thud',{v:.3,p:1.2});const k=c.s===T&&t.a.s!==T;pop(k?'КОЗИР!':'БИТО!',c.b.x,c.b.y,k?'k':'b');sfx(k?'mult':'chip',{v:k?.9:.7})},230)}
@@ -219,20 +313,38 @@ function botAtk(forced){const o=B.filter(c=>canAtk(c,'b')).sort((x,y)=>(x.s===T)
   const n=o.filter(c=>c.s!==T);if(n.length){if(!forced&&n[0].r>10&&Math.random()<.5)return null;return n[0]}return deck.length===0?o[0]:null}
 
 async function pAtk(){
-  table=[];let taking=false;
+  table=[];let taking=false;clearSel();
   for(;;){
     const can=P.some(c=>canAtk(c,'p'));
     if(table.length&&!can)break;
     mode='atk';layout();setBtns(table.length>0,false);
-    say(!table.length?'Твій хід — атакуй будь-якою картою':taking?NMf()+' бере — підкинь ще або «Бито»':'Підкинь карту того ж рангу або «Бито»');
+    say(sel.length?'Обрано: '+sel.length+'. Додай карти того ж рангу або тисни «Кинути»':!table.length?'Твій хід — атакуй (можна кинути кілька карт одного рангу)':taking?NMf()+' бере — підкинь ще або «Бито»':'Підкинь карту того ж рангу або «Бито»');
     const a=await waitAct();
-    if(a.btn==='bito')break;
-    if(!canAtk(a.card,'p')){nope(a.card);continue}
-    mode=null;setBtns(0,0);playAtk('p',a.card);if(MP)MP.send({k:'atk',s:a.card.s,r:a.card.r});await sleep(500);
+    if(a.btn==='bito'){clearSel();break}
+    let batch;
+    if(a.btn==='throw'){batch=sel.slice()}
+    else{
+      const c=a.card;
+      if(sel.includes(c)){c.sel=false;sel=sel.filter(x=>x!==c);updThrow();layout();continue}
+      let sw=false;if(sel.length&&c.r!==sel[0].r&&canAtk(c,'p')){clearSel();sw=true}
+      if(!canSel(c)){nope(c);continue}
+      const partner=capA()>1&&P.some(x=>x!==c&&x.r===c.r&&canAtk(x,'p'));
+      if(sw||sel.length||partner){c.sel=true;sel.push(c);updThrow();layout();sfx('hover',{v:.4});continue}
+      batch=[c];
+    }
+    if(!batch.length)continue;
+    clearSel();mode=null;setBtns(0,0);
+    for(const c of batch){playAtk('p',c);if(batch.length>1)await sleep(160)}
+    if(MP)MP.send({k:'atk',cs:batch.map(c=>[c.s,c.r])});
+    await sleep(500);
     if(!taking){
       say(NMf()+' думає…');if(!MP)await sleep(600);
-      const t=undef()[0];let dc;if(MP){const m=await rx();dc=m.k==='def'?oc(m):null}else dc=botDef(t.a);
-      if(dc){defend(t,dc,'b');await sleep(600)}else{taking=true;pop('БЕРУ!',W/2,H/2-ch*.1,'t');sfx('whoosh',{v:.8,p:.8});await sleep(500)}
+      for(let i=0;i<batch.length;i++){
+        let t,dc;
+        if(MP){const m=await rx();dc=m.k==='def'?oc(m):null;t=dc&&(table[m.t]&&!table[m.t].d?table[m.t]:undef()[0])}
+        else{t=undef()[0];dc=botDef(t.a)}
+        if(dc){defend(t,dc,'b');await sleep(600)}else{taking=true;pop('БЕРУ!',W/2,H/2-ch*.1,'t');sfx('whoosh',{v:.8,p:.8});await sleep(500);break}
+      }
     }
   }
   if(MP)MP.send({k:'bito'});
@@ -243,14 +355,10 @@ async function bAtk(){
   for(;;){
     say('Бот атакує…');await sleep(table.length?500:700);
     const c=botAtk(false);if(!c)break;
-    playAtk('b',c);await sleep(500);
-    mode='def';layout();setBtns(0,1);say('Відбий карту або тисни «Взяти»');
-    for(;;){
-      const a=await waitAct();
-      if(a.btn==='take'){took=true;break}
-      const t=undef()[0];
-      if(beats(a.card,t.a)){defend(t,a.card,'p');break}else nope(a.card);
-    }
+    const batch=botBatch(c);
+    for(const x of batch){playAtk('b',x);if(batch.length>1)await sleep(160)}
+    await sleep(500);
+    took=await pDef();
     mode=null;layout();setBtns(0,0);
     if(took){await sleep(400);let c2;while((c2=botAtk(true))){playAtk('b',c2);await sleep(350)}break}
     await sleep(600);
@@ -262,15 +370,11 @@ async function bAtkMP(){
   for(;;){
     mode=null;setBtns(0,0);say(NMf()+' атакує…');
     const m=await rx();if(m.k==='bito')break;
-    playAtk('b',oc(m));await sleep(500);
+    const cs=m.cs||[[m.s,m.r]];
+    for(const [cs_,cr] of cs){playAtk('b',oc({s:cs_,r:cr}));if(cs.length>1)await sleep(160)}
+    await sleep(500);
     if(took)continue;
-    mode='def';layout();setBtns(0,1);say('Відбий карту або тисни «Взяти»');
-    for(;;){
-      const a=await waitAct();
-      if(a.btn==='take'){took=true;MP.send({k:'take'});break}
-      const t=undef()[0];
-      if(beats(a.card,t.a)){defend(t,a.card,'p');MP.send({k:'def',s:a.card.s,r:a.card.r});break}else nope(a.card);
-    }
+    took=await pDef();
     mode=null;layout();setBtns(0,0);await sleep(600);
   }
   await finish(took);
