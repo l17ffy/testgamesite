@@ -104,9 +104,9 @@ const netPush=m=>inW.length?inW.shift()(m):inbox.push(m);
 const rx=async()=>{const m=await(inbox.length?inbox.shift():new Promise(r=>inW.push(r)));if(m.k==='left')throw'left';return m};
 const nextDeck=()=>deckQ.length?Promise.resolve(deckQ.shift()):new Promise(r=>deckW.push(r));
 const oc=m=>B.find(c=>c.s===m.s&&c.r===m.r);
-async function loadTry(){for(const u of['https://esm.run/trystero','https://cdn.jsdelivr.net/npm/trystero/+esm','https://esm.sh/trystero']){try{return await import(u)}catch(e){}}throw 0}
+async function loadTry(){for(const u of['https://esm.run/trystero@0.21.5','https://cdn.jsdelivr.net/npm/trystero@0.21.5/+esm','https://esm.sh/trystero@0.21.5']){try{return await import(u)}catch(e){}}throw 0}
 let mpBusy=false,mpCur=null;
-const STR={N:['https://esm.run/trystero','https://cdn.jsdelivr.net/npm/trystero/+esm','https://esm.sh/trystero/nostr','https://cdn.skypack.dev/trystero'],M:['https://esm.run/trystero/mqtt','https://cdn.jsdelivr.net/npm/trystero/mqtt/+esm','https://esm.sh/trystero/mqtt','https://cdn.skypack.dev/trystero/mqtt'],T:['https://esm.run/trystero/torrent','https://cdn.jsdelivr.net/npm/trystero/torrent/+esm','https://esm.sh/trystero/torrent','https://cdn.skypack.dev/trystero/torrent']},ORD=['N','M','T'];
+const STR={N:['https://esm.run/trystero@0.21.5','https://cdn.jsdelivr.net/npm/trystero@0.21.5/+esm','https://esm.sh/trystero@0.21.5/nostr','https://cdn.skypack.dev/trystero@0.21.5'],M:['https://esm.run/trystero@0.21.5/mqtt','https://cdn.jsdelivr.net/npm/trystero@0.21.5/mqtt/+esm','https://esm.sh/trystero@0.21.5/mqtt','https://cdn.skypack.dev/trystero@0.21.5/mqtt'],T:['https://esm.run/trystero@0.21.5/torrent','https://cdn.jsdelivr.net/npm/trystero@0.21.5/torrent/+esm','https://esm.sh/trystero@0.21.5/torrent','https://cdn.skypack.dev/trystero@0.21.5/torrent']},ORD=['N','M','T'];
 const mpBtns=v=>['bStart','bHost','bJoin'].forEach(i=>$('#'+i).disabled=!v);
 addEventListener('error',e=>{if(!mpBusy)return;const t=String(e.message||e.error||'');if(/BLOCKED|NetworkError|SecurityError/i.test(t)){e.preventDefault();mpFail('З’єднання заблоковане')}});
 addEventListener('unhandledrejection',e=>{if(!mpBusy)return;e.preventDefault();mpFail(String(e.reason&&e.reason.message||e.reason||'помилка').slice(0,80))});
