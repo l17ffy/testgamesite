@@ -52,7 +52,9 @@ box-shadow:0 calc(var(--p)*-1) 0 0 #111,calc(var(--p)*-1) 0 0 0 #111,var(--p) 0 
 :root{--maxw:1440px;--gut:0px}
 html{font-size:16px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{width:100%;max-width:100%;height:100%;height:100dvh;overflow:hidden;overflow-x:hidden;overscroll-behavior:none}
-body{background:radial-gradient(ellipse 70% 60% at 50% 40%,#14503a,#0b3a20 80%) #0b3a20}
+body{background:#3b7b66}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 40% 35% at 20% 30%,#52967d,transparent),radial-gradient(ellipse 45% 40% at 78% 55%,#2e6a57,transparent),radial-gradient(ellipse 40% 30% at 45% 85%,#4a8d75,transparent),radial-gradient(ellipse 30% 40% at 90% 10%,#2c6552,transparent),#3b7b66;background-size:140% 140%;animation:sw 30s ease-in-out infinite alternate}
+#world{background:none!important;animation:none!important;z-index:1}
 img,canvas,svg,video{max-width:100%;height:auto}
 /* ігрове поле — центрований контейнер; фон сторінки тягнеться на всю ширину */
 #world{left:0;right:0;margin-inline:auto;width:min(calc(100% - var(--gut)*2),var(--maxw));top:0;bottom:0;height:auto;overflow:hidden}
@@ -215,7 +217,7 @@ function layout(){
   HX=W/2;const m=(ch*1.55+H-ch*2.05)/2-ch*.05,dx=W-cw*.95,dy=H-ch*.8,rx=W-cw*.95,ry=ch*.75,y0=table.length>3?m-ch*.62:m,y1=m+ch*.62;
   deck.forEach((c,i)=>{c.loc='deck';setb(c,{x:dx-(i?0:cw*.5),y:dy-i*cw*.006,r:i?0:90,s:1,z:i,fd:!!i,fl:false})});
   B.forEach(c=>c.loc='b');P.forEach(c=>c.loc='p');
-  fan(B,ch*.55,-1,300,true);fan(P,H-ch*.9,1,300,false);
+  fan(B,ch*.55+Math.max(0,B.length-6)*ch*.012+ch*.15,-1,300,true);fan(P,H-ch*.9,1,300,false);
   table.forEach((t,i)=>{const n=i<3?Math.min(3,table.length):table.length-3,x=HX-(t.d?cw*.12:0)+(i%3-(n-1)/2)*cw*1.3,y=i<3?y0:y1;t.a.loc=t.d?t.d.loc='table':'table';
     setb(t.a,{x,y,r:t.a.rr,s:1,z:200+i*2,fd:false,fl:false});
     if(t.d)setb(t.d,{x:x+cw*.24,y:y+ch*.1,r:t.d.rr,s:1,z:201+i*2,fd:false,fl:false})});
