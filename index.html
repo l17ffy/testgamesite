@@ -143,6 +143,9 @@ img,canvas,svg,video{max-width:100%;height:auto}
 #tdesc{position:absolute;left:calc(100% + 8px);bottom:0;width:min(230px,52vw);display:none;padding:8px 10px;color:#26262e;background:#f6f4ec;font-size:14px;line-height:1.2;border-radius:6px;box-shadow:0 var(--sh) 0 rgba(0,0,0,.32)}
 #tdesc{position:absolute;z-index:990;pointer-events:none;box-sizing:border-box;text-align:left}
 #tdesc.show{display:block}
+#tcast{position:absolute;left:50%;top:calc(var(--ch)*1.25);transform:translateX(-50%);z-index:970;display:none;width:min(300px,86%);box-sizing:border-box;padding:8px 12px;background:rgba(0,0,0,.82);color:#f5edd2;font-size:15px;line-height:1.2;text-align:center;text-shadow:2px 2px 0 #000;pointer-events:none}
+#tcast small{display:block;color:#ffd23f;font-size:12px}
+#tcast b{font-weight:400;color:#b79cff;margin-right:6px}
 #tdesc b{font-weight:400;color:#8a71e1;margin-right:6px}
 .card.ench .f{outline:calc(var(--p)*1.5) solid #b36bff;outline-offset:calc(var(--p)*-1.5)}
 .card.rev .f{outline:var(--p) solid #5ec8ff;outline-offset:calc(var(--p)*-1)}
@@ -163,8 +166,8 @@ img,canvas,svg,video{max-width:100%;height:auto}
 </style></head><body>
 <div id="world"><div class="slot" id="slT"></div><div class="slot" id="slB"></div><div id="stage"></div>
 <div id="status"></div><div id="deckinfo"></div><div class="lbl" id="cB"></div><div class="lbl" id="cP"></div>
-<div id="btns"><button class="btn throw" id="bThrow" style="display:none">Кинути</button><button class="btn bito" id="bBito">Бито</button><button class="btn take" id="bTake">Взяти</button></div>
-<div id="tslot"><div id="trow"><div id="tcard"><i id="tnum2"></i><b id="tnm"></b></div></div><div id="tfx"></div></div><div id="tdesc"></div>
+<div id="btns"><button class="btn throw" id="bOk" style="display:none">Відбити</button><button class="btn throw" id="bThrow" style="display:none">Кинути</button><button class="btn bito" id="bBito">Бито</button><button class="btn take" id="bTake">Взяти</button></div>
+<div id="tslot"><div id="trow"><div id="tcard"><i id="tnum2"></i><b id="tnm"></b></div></div><div id="tfx"></div></div><div id="tdesc"></div><div id="tcast"></div>
 <div id="tbanner"><span id="tbT"></span><button class="btn bito sm" id="tbX">Скасувати вибір</button></div>
 <div class="modal-overlay" id="tmodal"><div><h2 id="tmT"></h2><div id="tmCards"></div><button class="btn bito sm" id="tmX">Закрити</button></div></div>
 <div id="end"><div><h2 id="endT"></h2><button class="btn bito" id="bAgain">Ще раз</button></div></div>
@@ -349,7 +352,7 @@ $('#bHost').onclick=()=>{const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let c='';for
 $('#bJoin').onclick=()=>{const c=$('#code').value.trim().toUpperCase();if(!c){$('#mpmsg').textContent='Введи код кімнати';return}mpStart(false,c)};
 try{if(location.hash.length>1)$('#code').value=location.hash.slice(1,7)}catch(e){}
 
-let HX,W,H,cw,ch,T,deck,P,B,table,disc,att,all,hov=null,mode=null,resolver=null,shk=0,mx=-999,my=-999;
+let TTbl=[],HX,W,H,cw,ch,T,deck,P,B,table,disc,att,all,hov=null,mode=null,resolver=null,shk=0,mx=-999,my=-999;
 
 function mk(s,r){
   const el=document.createElement('div');el.className='card';
@@ -380,6 +383,7 @@ function layout(){
   table.forEach((t,i)=>{const n=i<3?Math.min(3,table.length):table.length-3,x=HX-(t.d?cw*.12:0)+(i%3-(n-1)/2)*cw*1.3,y=i<3?y0:y1;t.a.loc=t.d?t.d.loc='table':'table';
     setb(t.a,{x,y,r:t.a.rr,s:1,z:200+i*2,fd:false,fl:false});
     if(t.d)setb(t.d,{x:x+cw*.24,y:y+ch*.1,r:t.d.rr,s:1,z:201+i*2,fd:false,fl:false})});
+  TTbl.forEach((c,i)=>{if(c.cen)return;setb(c,{x:cw*.8,y:H/2+(i-(TTbl.length-1)/2)*ch*.55,r:c.rr,s:.95,z:260+i,fd:false,fl:false})});
   disc.forEach((c,i)=>{c.loc='disc';setb(c,{x:rx+c.jx,y:ry+c.jy,r:c.rr+720,s:1,z:100+i,fd:true,fl:false})});
   deck.forEach((c,i)=>c.el.classList.toggle('stk',i>1));disc.forEach((c,i)=>c.el.classList.toggle('stk',i>0));B.concat(P).forEach(c=>c.el.classList.remove('stk'));table.forEach(t=>{t.a.el.classList.remove('stk');if(t.d)t.d.el.classList.remove('stk')});
   const u=undef()[0];
@@ -440,14 +444,14 @@ function onTimeUp(){if(!resolver)return;pop('ЧАС!',W/2,H/2-ch*.1,'k');sfx('no
   if(sel.length)return act({btn:'throw'});
   if(table.length)return act({btn:'bito'});
   const o=P.slice().sort((x,y)=>(x.s===T)-(y.s===T)||x.r-y.r)[0];act(o?{card:o}:{btn:'bito'})}
-const waitAct=end=>new Promise(r=>{resolver=r;updTarot();if(end)startTimer(end)});
+const waitAct=end=>new Promise(r=>{resolver=r;updTarot()}); // ліміт часу прибрано
 function act(v){stopTimer();if(resolver){const r=resolver;resolver=null;r(v)}updTarot()}
 function pop(t,x,y,cl){const d=document.createElement('div');d.className='pop '+cl;d.textContent=t;d.style.left=x+'px';d.style.top=y+'px';W0.appendChild(d);setTimeout(()=>d.remove(),1050)}
 function nope(c){c.p.r.v+=500;c.p.x.v+=(Math.random()<.5?-1:1)*700;sfx('nope',{v:.7})}
 addEventListener('pointermove',e=>{mx=e.clientX-ox;my=e.clientY-W0.getBoundingClientRect().top});
 addEventListener('pointerdown',e=>{mx=e.clientX-ox;my=e.clientY-W0.getBoundingClientRect().top;if(e.target.closest('.btn'))return;{const tc=TGres?null:tHit(mx,my);if(tc){const D=$('#tdesc').classList;if(TSEL!==tc||!D.contains('show')){TSEL=tc;TCK=tc;updTarot();D.add('show')}else if(!playTar(tc))sfx('nope',{v:.6});return}$('#tdesc').classList.remove('show');TCK=null}if(TGres){const c0=hit();if(c0&&(!TGok||TGok(c0)))tgDone(c0);else if(c0)nope(c0);return}const c=hit();if(c&&mode){act({card:c});return}if(mode==='def'){const t=hitT();if(t)act({tgt:t})}});
 addEventListener('pointerup',e=>{if(e.pointerType==='touch'){mx=my=-999}});
-$('#bBito').onclick=()=>act({btn:'bito'});$('#bThrow').onclick=()=>act({btn:'throw'});$('#bTake').onclick=()=>act({btn:'take'});
+$('#bBito').onclick=()=>act({btn:'bito'});$('#bThrow').onclick=()=>act({btn:'throw'});$('#bOk').onclick=()=>act({btn:'ok'});$('#bTake').onclick=()=>act({btn:'take'});
 $('#bAgain').onclick=()=>{if(MP&&MP.dead)return location.reload();$('#end').style.display='none';game()};
 addEventListener('resize',resize);
 
@@ -460,11 +464,14 @@ function canSel(c){if(!canAtk(c,'p'))return false;if(!sel.length||sel.includes(c
 function updThrow(){const b=$('#bThrow');b.style.display=sel.length?'':'none';b.textContent=sel.length>1?'Кинути ×'+sel.length:'Кинути'}
 function clearSel(){sel.forEach(c=>c.sel=false);sel=[];updThrow()}
 function botBatch(c){const cap=Math.min(6-table.length,P.length-undef().length),same=B.filter(x=>x!==c&&x.r===c.r&&x.s!==T).slice(0,Math.max(0,cap-1));return same.length&&Math.random()<.5?[c,...same]:[c]}
-async function pDef(){
-  mode='def';dsel=null;layout();setBtns(0,1);let dl=0;
+let ptg=null,dtr=false;
+async function pDef(){try{return await pDef0()}finally{$('#bOk').style.display='none';ptg=null;dtr=false}}
+async function pDef0(){
+  mode='def';dsel=null;ptg=null;dtr=false;layout();setBtns(0,1);let dl=0;
   for(;;){
     const u=undef();if(!u.length)return false;
-    say(dsel?'Клікни на карту на столі, яку б\'єш':u.length>1?'Відбий карти (лишилось '+u.length+') або «Взяти»':'Відбий карту або тисни «Взяти»'+(P.some(canTr)?' (або переведи картою того ж рангу)':''));
+    $('#bOk').style.display=dsel&&(ptg||dtr)?'':'none';
+    say(dsel&&(ptg||dtr)?'Підтверди хід кнопкою «Відбити»':dsel?'Клікни на карту на столі, яку б\'єш':u.length>1?'Відбий карти (лишилось '+u.length+') або «Взяти»':'Відбий карту або тисни «Взяти»'+(P.some(canTr)?' (або переведи картою того ж рангу)':''));
     if(!dl)dl=Date.now()+THROW_SEC*1000;
     const a=await waitAct(dl);
     if(a.tarot){if(dsel){dsel.sel=false;dsel=null}const sg=await doT('p',a.tarot,a.tc);dl=0;if(sg==='death')return 'death';mode='def';setBtns(0,1);layout();continue}
@@ -472,16 +479,21 @@ async function pDef(){
     let t=null,c=null;
     if(a.card){
       c=a.card;
-      if(dsel===c){c.sel=false;dsel=null;layout();continue}
-      if(canTr(c)&&!u.some(x=>beats(c,x.a))){if(dsel){dsel.sel=false;dsel=null}playAtk('p',c);pop('ПЕРЕВІД!',W/2,H/2-ch*.1,'t');sfx('mult',{v:.8});await sleep(800);return 'tr'}
+      if(dsel===c){c.sel=false;dsel=null;ptg=null;dtr=false;layout();continue}
       const ts=u.filter(x=>beats(c,x.a));
-      if(!ts.length){nope(c);continue}
-      if(ts.length===1)t=ts[0];
-      else{if(dsel)dsel.sel=false;dsel=c;c.sel=true;layout();sfx('hover',{v:.4});continue}
+      const tr=canTr(c)&&!ts.length;
+      if(!ts.length&&!tr){nope(c);continue}
+      if(dsel)dsel.sel=false;
+      dsel=c;c.sel=true;ptg=ts.length===1?ts[0]:null;dtr=tr;layout();sfx('hover',{v:.4});continue;
     }else if(a.tgt){
-      if(!dsel)continue;
+      if(!dsel||dtr)continue;
       if(!beats(dsel,a.tgt.a)){nope(dsel);continue}
-      t=a.tgt;c=dsel;
+      ptg=a.tgt;layout();sfx('hover',{v:.4});continue;
+    }else if(a.btn==='ok'){
+      if(!dsel||!(ptg||dtr))continue;
+      c=dsel;
+      if(dtr){c.sel=false;dsel=null;dtr=false;playAtk('p',c);pop('ПЕРЕВІД!',W/2,H/2-ch*.1,'t');sfx('mult',{v:.8});await sleep(800);return 'tr'}
+      t=ptg;ptg=null;
     }else continue;
     if(dsel){dsel.sel=false;dsel=null}
     const ti=table.indexOf(t);
@@ -595,15 +607,18 @@ function throwTar(who,id,tc){ // карта Таро летить на стіл,
   setb(c,{x:HX+rnd(-cw*.8,cw*.8),y:m+rnd(-ch*.1,ch*.1),r:c.rr,s:1.08,z:260,fd:false,fl:false});
   sfx('slide',{v:.8,p:who==='p'?1:.95});
   setTimeout(()=>{shk=Math.max(shk,10);sfx('deal2',{v:.9});sfx('thud',{v:.3,p:1.1})},230);
-  setTimeout(()=>{sfx('deal',{v:.5,j:.03});tarBita(c)},1300)}
+  c.cen=1;TTbl.push(c);setTimeout(()=>{sfx('deal',{v:.5,j:.03});c.cen=0;layout()},1300)}
 async function doT(who,id,tc){ // карта Таро = подія хаосу
   const me=who==='p';
   throwTar(who,id,tc);playTrack(id);TDisc.push(id);TU[who]=(TU[who]||0)+1;await sleep(450);
-  pop((me?'':NMf().toUpperCase()+': ')+TAR[id][0].toUpperCase()+'!',W/2,H/2-ch*.1,me?'t':'k');sfx('mult',{v:.8,p:.8});shk=14;
+  pop((me?'':NMf().toUpperCase()+': ')+TAR[id][0].toUpperCase()+'!',W/2,H/2-ch*.1,me?'t':'k');sfx('mult',{v:.8,p:.8});shk=14;showCast(who,id);
   clearSel();dsel=null;
   await CHF[id](who);layout();if(MP&&me)MP.send({k:'tar',id,sn:snapT()});
   layout();await sleep(700);return null}
 /* ---- Таро в мультиплеєрі: гравець виконує ефект у себе й шле суперникові знімок стану ---- */
+const TARB={eye:'Суперник бачить твої карти 2 раунди.',steal:'Забирає випадкову карту з твоєї руки.',dump:'Ти добираєш ще 2 карти (понад ліміт).',curse:'Твоя найсильніша карта стає шісткою.',burn:'Знищує випадкову карту Таро з твоїх.',confiscate:'Випадкова карта з твоєї руки йде в Бито.',detrump:'До 2 твоїх козирів міняють масть на некозирну.',devalue:'Усі твої карти старші за 6 слабшають на 2 ранги.',junk:'Ти забираєш 3 найслабші карти з Бито.',swapbad:'Його найслабша карта міняється на твою найсильнішу.',silence:'Ти не можеш грати Таро до кінця раунду.',robbery:'Забирає твою найсильнішу некозирну карту.',starve:'Ти не добираєш карти в кінці раунду.',soul:'Забирає випадкову карту Таро з твоїх.',roulette:'Випадково: 2 карти добирає він або ти.'};
+let castTm=0;
+function showCast(who,id){const t=TAR[id],e=$('#tcast'),me=who==='p';e.innerHTML='<small>'+(me?'Ти граєш':NMf()+' грає')+'</small><b>'+t[0]+'</b>'+t[1]+'<br>'+(me?t[2]:(TARB[id]||t[2]));e.style.display='block';clearTimeout(castTm);castTm=setTimeout(()=>{e.style.display='none'},4500)}
 function snapT(){return{T,cs:all.filter(c=>c.u!=null&&!c.tar).map(c=>[c.u,c.s,c.r,c.ench?1:0]),p:P.map(c=>c.u),b:B.map(c=>c.u),dk:deck.map(c=>c.u),ds:disc.filter(c=>!c.tar).map(c=>c.u),tp:TPcs.map(c=>c.tar),tb:TBcs.map(c=>c.tar),sun:[SUN.p,SUN.b],tu:[TU.p,TU.b],nod:[NOD.p,NOD.b]}}
 function applyTSnap(sn){ // знімок прийшов з боку суперника: його p = наше b
   const by=new Map(all.filter(c=>c.u!=null).map(c=>[c.u,c]));
@@ -617,7 +632,7 @@ function applyTSnap(sn){ // знімок прийшов з боку суперн
 async function remoteTar(m){ // суперник зіграв карту Таро
   const id=m.id;let c=TBcs.find(x=>x.tar===id);if(!c){setTar('b',id);c=TBcs[TBcs.length-1]}
   throwTar('b',id,c);playTrack(id);TDisc.push(id);TU.b=(TU.b||0)+1;await sleep(450);
-  pop(NMf().toUpperCase()+': '+TAR[id][0].toUpperCase()+'!',W/2,H/2-ch*.1,'k');sfx('mult',{v:.8,p:.8});shk=14;
+  pop(NMf().toUpperCase()+': '+TAR[id][0].toUpperCase()+'!',W/2,H/2-ch*.1,'k');sfx('mult',{v:.8,p:.8});shk=14;showCast('b',id);
   applyTSnap(m.sn);await sleep(900)}
 async function botStartT(pr){ // бот грає свою карту на початку атаки
   if(TU.b>=2||MP)return;
@@ -627,7 +642,7 @@ function tHit(x,y){let b=null,bd=1e9;for(const c of TPcs){if(!c.b)continue;const
 function updTarot(){
   const sl=$('#tslot');if(!all||!table){sl.style.display='none';return}
   if(TSEL&&!TPcs.includes(TSEL))TSEL=null;
-  const t=TSEL&&TAR[TSEL.tar],fx=[];if(SUN.p)fx.push('Сонце: ще '+SUN.p);if(REV>0)fx.push('Рука '+(MP?'суперника':'бота')+' відкрита');if(SUN.b)fx.push(NMf()+': Сонце ×'+SUN.b);
+  const t=TSEL&&TAR[TSEL.tar],fx=[];if(SUN.p)fx.push('Сонце: ще '+SUN.p);if(REV>0)fx.push('Рука '+(MP?'суперника':'бота')+' відкрита');if(SUN.b)fx.push(NMf()+': Сонце ×'+SUN.b);if(TU.p>=9)fx.push('Мовчання: ти не граєш Таро');if(TU.b>=9)fx.push(NMf()+' під Мовчанням');if(NOD.p)fx.push('Ти не добираєш карти');if(NOD.b)fx.push(NMf()+' не добирає карти');
   sl.style.display=TPcs.length||fx.length?'flex':'none';if(!t){sl.classList.remove('show');$('#tdesc').classList.remove('show')}
   const dd=$('#tdesc');if(t){dd.innerHTML='<b>'+t[0]+'</b>'+t[1]+'<br>'+t[2]+'<br><i style="color:#8a8a96">клік - зіграти</i>';const w=Math.min(230,W*.52),bb=TSEL.b;dd.style.width=w+'px';dd.style.left=(W/2-w/2)+'px';dd.style.top='auto';dd.style.bottom=(ch*2.05+32)+'px';dd.style.textAlign='center'}else dd.textContent='';
   if(TCK&&!TPcs.includes(TCK))TCK=null;
@@ -678,8 +693,7 @@ async function pAtk(tr){
       let sw=false;if(sel.length&&c.r!==sel[0].r&&canAtk(c,'p')){clearSel();sw=true}
       if(!canSel(c)){nope(c);continue}
       const partner=capA()>1&&P.some(x=>x!==c&&x.r===c.r&&canAtk(x,'p'));
-      if(sw||sel.length||partner){c.sel=true;sel.push(c);updThrow();layout();sfx('hover',{v:.4});continue}
-      batch=[c];
+      c.sel=true;sel.push(c);updThrow();layout();sfx('hover',{v:.4});continue;
     }
     if(!batch.length)continue;
     clearSel();mode=null;setBtns(0,0);dl=0;sunUse('p',batch);
@@ -727,7 +741,7 @@ async function bAtkMP(){
   await finish(took);
 }
 async function finish(took,tw){const toD=c=>{if(c){c.rr=rnd(-25,25);c.jx=rnd(-7,7);c.jy=rnd(-7,7);disc.push(c)}};
-  say(took?'Забирає карти...':'Бито!');await sleep(400);
+  say(took?'Забирає карти...':'Бито!');await sleep(400);TTbl.splice(0).forEach(c=>{c.cen=0;tarBita(c)});
   if(took){const h=att==='p'?B:P;table.forEach(t=>{if(tw&&t.d){toD(t.a);toD(t.d)}else{h.push(t.a);if(t.d)h.push(t.d)}})}
   else{table.forEach(t=>[t.a,t.d].forEach(c=>{if(c){c.rr=rnd(-25,25);c.jx=rnd(-7,7);c.jy=rnd(-7,7);disc.push(c)}}))}
   table=[];layout();sfx(took?'whoosh':'fan',{v:took?.7:.9});await sleep(650);
@@ -739,7 +753,7 @@ async function finish(took,tw){const toD=c=>{if(c){c.rr=rnd(-25,25);c.jx=rnd(-7,
 }
 function over(t,k){$('#endT').textContent=t;$('#end').style.display='grid';say('');sfx(k,{v:.9,j:0})}
 async function game(){
-  ST.innerHTML='';stopTimer();all=[];disc=[];table=[];P=[];B=[];hov=null;mode=null;resolver=null;deckTot=36;NOD={p:0,b:0};TGres=null;TGok=null;MODAL=0;REV=0;SUN={p:0,b:0};TU={p:0,b:0};TPcs=[];TBcs=[];TSEL=null;TCK=null;$('#tbanner').style.display='none';$('#tmodal').style.display='none';
+  ST.innerHTML='';stopTimer();TTbl=[];all=[];disc=[];table=[];P=[];B=[];hov=null;mode=null;resolver=null;deckTot=36;NOD={p:0,b:0};TGres=null;TGok=null;MODAL=0;REV=0;SUN={p:0,b:0};TU={p:0,b:0};TPcs=[];TBcs=[];TSEL=null;TCK=null;$('#tbanner').style.display='none';$('#tmodal').style.display='none';
   let ord=[];for(let s=0;s<4;s++)for(let r=6;r<=14;r++)ord.push([s,r]);
   let plan=null;if(MP&&!MP.host){say('Чекаю роздачі...');plan=await nextDeck();ord=plan.o}else{for(let i=35;i>0;i--){const j=Math.random()*(i+1)|0;[ord[i],ord[j]]=[ord[j],ord[i]]}if(MP){TD=Object.keys(TAR).sort(()=>Math.random()-.5);TDisc=[];const t1=drawT('p'),t2=drawT('b'),ex=TD.splice(0,TD.length),lim=Math.max(2,ord.length-12);plan={o:ord,t1,t2,ins:ex.map(id=>[1+Math.random()*(lim-1)|0,id])};MP.send({k:'deck',...plan})}}
   deck=ord.map(([s,r],i)=>{const c=mk(s,r);c.u=i;return c});
